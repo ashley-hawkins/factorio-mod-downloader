@@ -1,4 +1,7 @@
-FROM cgr.dev/chainguard/go:latest as build
+FROM --platform=$BUILDPLATFORM cgr.dev/chainguard/go:latest AS build
+
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /app
 
@@ -9,8 +12,7 @@ COPY . .
 RUN go mod download
 
 # Build the binary
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o factorio-mod-downloader ./cmd/cli
-RUN chmod +x ./cmd/cli
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -a -installsuffix cgo -o factorio-mod-downloader ./cmd/cli
 # Start a new stage from scratch
 FROM debian:stable-slim
 RUN apt-get update && apt-get install -y ca-certificates
